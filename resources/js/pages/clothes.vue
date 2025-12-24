@@ -14,6 +14,7 @@ const { success, error } = useToast();
 interface Clothes {
     id: number;
     name: string;
+    code: string;
     image: string;
     created_at: string;
     updated_at: string;
@@ -449,6 +450,9 @@ watch(isEditOpen, (val) => {
                                     Clothes name
                                 </th>
                                 <th scope="col" class="px-6 py-3 font-medium">
+                                    Clothes code
+                                </th>
+                                <th scope="col" class="px-6 py-3 font-medium">
                                     Created at
                                 </th>
                                 <th scope="col" class="px-6 py-3 font-medium">
@@ -472,6 +476,9 @@ watch(isEditOpen, (val) => {
                                 </th>
                                 <td class="px-6 py-4">
                                     {{ item.name }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ item.code }}
                                 </td>
                                 <td class="px-6 py-4">
                                     {{ new Date(item.created_at).toLocaleDateString() }}
