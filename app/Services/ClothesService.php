@@ -70,4 +70,13 @@ class ClothesService
             throw $th;
         }
     }
+
+    public function bulkDestroyClothes($request)
+    {
+        try {
+            return $this->clothes_repository->bulkDelete($request->ids);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
 }

@@ -12,4 +12,5 @@ interface ClothesRepositoryInterface
     public function create(array $data): Clothes;
     public function update(Clothes $clothes, array $data): bool;
     public function delete(Clothes $clothes): bool;
+     public function bulkDelete(array $ids): int;
 }

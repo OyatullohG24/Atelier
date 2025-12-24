@@ -11,6 +11,7 @@ use Inertia\Inertia;
 class ClothesController extends Controller
 {
     public function __construct(protected ClothesService $clothes_service) {}
+
     public function index()
     {
         $clothes = $this->clothes_service->getAll();
@@ -20,12 +21,17 @@ class ClothesController extends Controller
         ]);
     }
 
+    public function show($id)
+    {
+        return $this->clothes_service->getOne($id);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
             'clothes_name' => 'required|string|max:255',
             'code' => 'required|string|max:255',
-            'clothes_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'clothes_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
         $this->clothes_service->createClothes($request);
         return redirect()->back()->with('success', 'Clothes created successfully');
@@ -64,6 +70,16 @@ class ClothesController extends Controller
 
         $clothes->delete();
 
+        return redirect()->back()->with('success', 'Clothes deleted successfully');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:clothes,id',
+        ]);
+        $this->clothes_service->bulkDestroyClothes($request);
         return redirect()->back()->with('success', 'Clothes deleted successfully');
     }
 }

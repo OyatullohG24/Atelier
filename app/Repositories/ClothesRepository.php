@@ -33,4 +33,9 @@ class ClothesRepository implements ClothesRepositoryInterface
     {
         return $clothes->delete();
     }
+
+    public function bulkDelete(array $ids): int
+    {
+        return $this->clothes->whereIn('id', $ids)->delete();
+    }
 }

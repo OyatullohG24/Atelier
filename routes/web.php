@@ -16,6 +16,12 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 
-Route::resource('clothes', ClothesController::class);
+// Route::resource('clothes', ClothesController::class);
+Route::get('clothes', [ClothesController::class, 'index'])->name('clothes.index');
+Route::post('clothes', [ClothesController::class, 'store'])->name('clothes.store');
+Route::get('clothes/{id}', [ClothesController::class, 'show'])->name('clothes.show');
+Route::put('clothes/{id}', [ClothesController::class, 'bulkDestroy'])->name('clothes.bulk-delete');
+Route::delete('clothes/{id}', [ClothesController::class, 'bulkDestroy'])->name('clothes.bulk-delete');
+Route::delete('clothes', [ClothesController::class, 'bulkDestroy'])->name('clothes.bulk-delete');
 
 require __DIR__ . '/settings.php';
