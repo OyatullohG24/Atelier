@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js';
@@ -10,7 +10,6 @@ import ToastContainer from '@/components/useToast/ToastContainer.vue';
 import axios from 'axios'
 
 const { success, error } = useToast();
-
 
 interface Clothes {
     id: number;
@@ -21,10 +20,49 @@ interface Clothes {
 }
 
 // Props ni qabul qilish
-const { clothes, clothes_count } = defineProps<{
+const { clothes, clothes_count, filters } = defineProps<{
     clothes: Clothes[];
-    clothes_count: number;  // shu yerga qo'shasiz
+    clothes_count: number;
+    filters: {
+        search?: string
+    } // shu yerga qo'shasiz
 }>();
+
+// Search state
+const searchQuery = ref(filters?.search || '')
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
+
+// Search function
+const performSearch = () => {
+    router.get(
+        route('clothes.index'),
+        { search: searchQuery.value },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['clothes', 'filters']
+        }
+    )
+}
+
+// Debounced search (500ms kutadi)
+const handleSearch = () => {
+    if (searchTimeout) {
+        clearTimeout(searchTimeout)
+    }
+
+    searchTimeout = setTimeout(() => {
+        performSearch()
+    }, 500)
+}
+
+// Watch search input
+watch(searchQuery, handleSearch)
+
+// Clear search
+const clearSearch = () => {
+    searchQuery.value = ''
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -203,27 +241,53 @@ const onEditImageChange = (event: Event) => {
     editForm.clothes_image = file
 }
 
-// Update submit
-const submitUpdate = () => {
+// Update submit - to'liq Axios bilan
+const submitUpdate = async () => {
     if (!editingId.value) {
         error('ID topilmadi')
         return
     }
 
-    editForm.post(route('clothes.update', editingId.value), {
-        forceFormData: true,
-        _method: 'PUT',
-        onSuccess: () => {
-            closeEditModal()
-            success("Muvaffaqiyatli yangilandi!")
-        },
-        onError: (errors) => {
-            const firstError = Object.values(errors)[0] as string
-            error(firstError)
-        }
-    })
-}
+    try {
+        const formData = new FormData()
+        formData.append('clothes_name', editForm.clothes_name)
+        formData.append('code', editForm.code || '')
 
+        if (editForm.clothes_image) {
+            formData.append('clothes_image', editForm.clothes_image)
+        }
+
+        formData.append('_method', 'PUT')
+        editForm.processing = true
+
+        await axios.post(
+            route('clothes.update', editingId.value),
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            }
+        )
+
+        closeEditModal()
+        success("Muvaffaqiyatli yangilandi!")
+
+        // Oddiy reload
+        window.location.reload()
+
+    } catch (err: any) {
+        if (err.response?.data?.errors) {
+            const errors = err.response.data.errors
+            const firstError = Object.values(errors)[0] as string[]
+            error(firstError[0])
+        } else {
+            error('Xatolik yuz berdi')
+        }
+    } finally {
+        editForm.processing = false
+    }
+}
 // Watch edit modal
 watch(isEditOpen, (val) => {
     document.body.style.overflow = val ? 'hidden' : ''
@@ -342,9 +406,21 @@ watch(isEditOpen, (val) => {
                                             d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
                                     </svg>
                                 </div>
-                                <input type="text" id="input-group-1"
-                                    class="block w-full max-w-96 ps-9 pe-3 py-2 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-3 py-2.5 shadow-xs placeholder:text-body"
-                                    placeholder="Search">
+                                <!-- Search input -->
+                                <input type="text" id="search-input" v-model="searchQuery"
+                                    class="block w-full max-w-96 ps-9 pe-9 py-2 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body"
+                                    placeholder="Nom yoki kod bo'yicha qidiring..." />
+
+                                <!-- Clear button -->
+                                <button v-if="searchQuery" @click="clearSearch" type="button"
+                                    class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600 transition-colors"
+                                    title="Tozalash">
+                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                         <button v-if="selectedIds.length" class="ml-4 bg-red-500 text-white px-3 py-1 rounded"

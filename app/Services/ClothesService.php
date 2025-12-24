@@ -9,10 +9,10 @@ class ClothesService
 {
     public function __construct(protected ClothesRepositoryInterface $clothes_repository) {}
 
-    public function getAll()
+    public function getAll(array $filters = [])
     {
         try {
-            return $this->clothes_repository->all();
+            return $this->clothes_repository->all($filters);
         } catch (\Throwable $th) {
             throw $th;
         }

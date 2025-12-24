@@ -7,10 +7,10 @@ use App\Models\Clothes;
 
 interface ClothesRepositoryInterface
 {
-    public function all();
+    public function all(array $filters = []);
     public function find(int $id): ?Clothes;
     public function create(array $data): Clothes;
     public function update(Clothes $clothes, array $data): bool;
     public function delete(Clothes $clothes): bool;
-     public function bulkDelete(array $ids): int;
+    public function bulkDelete(array $ids): int;
 }

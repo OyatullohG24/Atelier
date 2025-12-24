@@ -9,9 +9,9 @@ class ClothesRepository implements ClothesRepositoryInterface
 {
     public function __construct(protected Clothes $clothes) {}
 
-    public function all()
+    public function all(array $filters = [])
     {
-        return $this->clothes->get();
+        return $this->clothes->filter($filters)->latest()->get();
     }
 
     public function create(array $data): Clothes

@@ -12,12 +12,15 @@ class ClothesController extends Controller
 {
     public function __construct(protected ClothesService $clothes_service) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        $clothes = $this->clothes_service->getAll();
+        $clothes = $this->clothes_service->getAll($request->all());
         return Inertia::render('clothes', [
             'clothes' => $clothes,
-            'clothes_count' => $clothes->count()
+            'clothes_count' => $clothes->count(),
+            'filters' => [
+                'search' => $request->get('search')
+            ]
         ]);
     }
 
@@ -37,28 +40,21 @@ class ClothesController extends Controller
         return redirect()->back()->with('success', 'Clothes created successfully');
     }
 
-    public function update(Request $request, Clothes $clothes)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        $request->validate([
+            'clothes_name' => 'required|string|max:255',
+            'code' => 'required|string|max:255',
+            'clothes_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
-
-        if ($request->hasFile('image')) {
-            // Delete old image
-            if ($clothes->image && \Storage::disk('public')->exists($clothes->image)) {
-                \Storage::disk('public')->delete($clothes->image);
-            }
-            $imagePath = $request->file('image')->store('clothes', 'public');
-            $validated['image'] = $imagePath;
-        } else {
-            // Don't update image field if no new image uploaded
-            unset($validated['image']);
+        // Axios uchun JSON response
+        if ($request->wantsJson() || $request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Clothes updated successfully',
+                'data' => $this->clothes_service->updateClothes($id, $request)
+            ]);
         }
-
-        $clothes->update($validated);
-
-        return redirect()->back()->with('success', 'Clothes updated successfully');
     }
 
     public function destroy(Clothes $clothes)
