@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\MaterialController;
 use App\Http\Controllers\Web\ClothesController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -22,5 +23,7 @@ Route::get('clothes/{id}', [ClothesController::class, 'show'])->name('clothes.sh
 Route::put('clothes/{id}', [ClothesController::class, 'update'])->name('clothes.update');
 Route::delete('clothes/{id}', [ClothesController::class, 'destroy'])->name('clothes.delete');
 Route::delete('clothes', [ClothesController::class, 'bulkDestroy'])->name('clothes.bulk-delete');
+
+Route::get('materials', [MaterialController::class, 'index'])->name('material.index');
 
 require __DIR__ . '/settings.php';
