@@ -51,8 +51,24 @@ const form = useForm({
     type: '',
     color_code: '',
     material_image: '',
-    code: ''
+    code: '',
+    measurement: ''
 })
+
+const imageFile = ref<File | null>(null)
+const imagePreview = ref<string | null>(null)
+
+const onImageChange = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    const file = target.files?.[0]
+
+    if (!file) return
+
+    imageFile.value = file
+    imagePreview.value = URL.createObjectURL(file)
+
+    form.material_image = file
+}
 
 </script>
 
@@ -281,6 +297,82 @@ const form = useForm({
                                     <p v-if="form.errors.code" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.code }}
                                     </p>
+
+                                    <!-- Material type select -->
+                                    <div>
+                                        <select v-model="form.type" class="w-full border rounded px-3 py-2">
+                                            <option value="" disabled class="text-gray-200">Material type select
+                                            </option>
+                                            <option value="mato">Mato</option>
+                                            <option value="tugma">Tugma</option>
+                                            <option value="ip">Ip</option>
+                                            <option value="zamok">Zamok</option>
+                                        </select>
+                                        <p v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{ form.errors.type
+                                            }}</p>
+                                    </div>
+
+                                    <!-- Material measurment select -->
+                                    <div>
+                                        <select v-model="form.measurement" class="w-full border rounded px-3 py-2">
+                                            <option value="" disabled class="text-gray-200">Material measurement select
+                                            </option>
+                                            <option value="kg">kg</option>
+                                            <option value="m">m</option>
+                                            <option value="kv">kv</option>
+                                            <option value="dona">dona</option>
+                                        </select>
+                                        <p v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{
+                                            form.errors.measurement
+                                            }}</p>
+                                    </div>
+
+                                    <!-- Material image -->
+                                    <label class="block">
+                                        <span class="text-sm font-medium text-gray-700 mb-1 block">
+                                            Clothes image
+                                        </span>
+
+                                        <div class="flex items-center justify-between border rounded px-3 py-2 cursor-pointer hover:border-green-500"
+                                            :class="{
+                                                'border-red-500 focus:ring-red-500': form.errors.code,
+                                                'focus:ring-green-500': !form.errors.material_image
+                                            }" @click="$refs.fileInput.click()">
+                                            <span class="text-gray-500 text-sm truncate">
+                                                {{ imageFile ? imageFile.name : 'Rasm tanlang' }}
+                                            </span>
+
+                                            <span class="text-sm text-green-600 font-medium">
+                                                Browse
+                                            </span>
+                                        </div>
+
+                                        <!-- REAL FILE INPUT (hidden) -->
+                                        <input type="file" accept="image/*" ref="fileInput" class="hidden"
+                                            @change="onImageChange" />
+                                    </label>
+                                    <p v-if="form.errors.material_image" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.material_image }}
+                                    </p>
+                                    <div v-if="imagePreview"
+                                        class="mt-4 rounded-lg border p-3 flex items-center gap-4 bg-gray-50">
+                                        <img :src="imagePreview" alt="Preview" class="h-20 w-20 object-cover rounded" />
+
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-gray-800">
+                                                {{ imageFile?.name }}
+                                            </p>
+                                            <p class="text-xs text-gray-500">
+                                                {{ (imageFile?.size / 1024).toFixed(1) }} KB
+                                            </p>
+                                        </div>
+
+                                        <button type="button" class="text-red-500 text-sm hover:underline"
+                                            @click="imageFile = null; imagePreview = null">
+                                            O‘chirish
+                                        </button>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
