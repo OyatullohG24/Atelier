@@ -38,6 +38,7 @@ class ClothesMaterialService
                     'updated_at' => now(),
                 ];
             }
+
             return $this->clothes_material_repository->insertMany($data);
         } catch (\Throwable $th) {
             throw $th;
@@ -51,8 +52,9 @@ class ClothesMaterialService
             $data = [
                 'clothes_id' => $request->clothes_id ?? $clothesMaterial->clothes_id,
                 'material_id' => $request->material_id ?? $clothesMaterial->material_id,
-                'amount' => $request->amount ?? $clothesMaterial->amount
+                'amount' => $request->amount ?? $clothesMaterial->amount,
             ];
+
             return $this->clothes_material_repository->update($clothesMaterial, $data);
         } catch (\Throwable $th) {
             throw $th;

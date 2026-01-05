@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
-
+import { ref } from 'vue';
+import axios from 'axios'
 
 interface Materials {
     id: number;
@@ -35,6 +36,24 @@ const getImageUrl = (path: string) => {
     return `/storage/${path}`;
 };
 
+const isOpen = ref(false);
+
+const openModal = () => {
+    isOpen.value = true
+}
+
+const closeModal = () => {
+    isOpen.value = false
+}
+
+const form = useForm({
+    material_name: '',
+    type: '',
+    color_code: '',
+    material_image: '',
+    code: ''
+})
+
 </script>
 
 <template>
@@ -44,33 +63,37 @@ const getImageUrl = (path: string) => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-flex flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div class="col-span-12">
-                <!-- Metric Item Start -->
-                <div
-                    class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-                    <h4 class="text-title-sm font-bold text-gray-800 dark:text-white/90">
-                        {{ materials_count }}
-                    </h4>
+                <!-- Metric Group Four -->
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-3">
+                    <!-- Metric Item Start -->
+                    <div
+                        class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+                        <h4 class="text-title-sm font-bold text-gray-800 dark:text-white/90">
+                            {{ materials_count }}
+                        </h4>
 
-                    <div class="mt-4 flex items-end justify-between sm:mt-5">
-                        <div>
-                            <p class="text-theme-sm text-gray-700 dark:text-gray-400">
-                                Active Deal
-                            </p>
-                        </div>
+                        <div class="mt-4 flex items-end justify-between sm:mt-5">
+                            <div>
+                                <p class="text-theme-sm text-gray-700 dark:text-gray-400">
+                                    Active Deal
+                                </p>
+                            </div>
 
-                        <div class="flex items-center gap-1">
-                            <span
-                                class="flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-theme-xs font-medium text-success-600 dark:bg-success-500/15 dark:text-success-500">
-                                +20%
-                            </span>
+                            <div class="flex items-center gap-1">
+                                <span
+                                    class="flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-theme-xs font-medium text-success-600 dark:bg-success-500/15 dark:text-success-500">
+                                    +20%
+                                </span>
 
-                            <span class="text-theme-xs text-gray-500 dark:text-gray-400">
-                                From last month
-                            </span>
+                                <span class="text-theme-xs text-gray-500 dark:text-gray-400">
+                                    From last month
+                                </span>
+                            </div>
                         </div>
                     </div>
+                    <!-- Metric Item End -->
                 </div>
-                <!-- Metric Item End -->
+                <!-- Metric Group Four -->
             </div>
             <div
                 class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
@@ -106,7 +129,7 @@ const getImageUrl = (path: string) => {
                                 </button>
                             </div>
                         </div>
-                        <button class="ml-auto bg-green-500 text-white px-3 py-1 rounded"
+                        <button class="ml-auto bg-green-500 text-white px-3 py-1 rounded" @click="openModal"
                             type="button">Qo'shish</button>
                     </div>
 
@@ -189,6 +212,79 @@ const getImageUrl = (path: string) => {
                             </tr>
                         </tbody>
                     </table>
+
+                    <Teleport to="body">
+                        <!-- Teleport komponenti -->
+                        <!--
+                            Vue 3 Teleport: Bu elementni DOMda boshqa joyga (bu yerda <body>) chiqaradi.
+                            Foydasi: modal va overlaylarni parent elementlar layout’idan mustaqil qilish.
+                        -->
+                        <div v-if="isOpen" class="fixed inset-0 z-[999] flex items-center justify-center">
+                            <!-- Modal container -->
+                            <!--
+                                v-if="isOpen": modal faqat ochilganda DOM’da bo‘ladi
+                                fixed inset-0: ekran bo‘ylab cho‘ziladi
+                                z-[999]: ustunlik, boshqa elementlardan yuqorida ko‘rinadi
+                                flex items-center justify-center: modalni ekran markaziga joylashtirish
+                            -->
+
+                            <!-- Overlay / fon qoplama -->
+                            <div class="absolute inset-0 bg-black/50 pointer-events-none"></div>
+                            <!--
+                                absolute inset-0: parent (modal container) ichida ekran bo‘ylab cho‘ziladi
+                                bg-black/50: 50% opasity qora fon (semi-transparent)
+                                pointer-events-none: overlay ustiga bosilsa click modalga o‘tmaydi
+                                Izoh: bu yerda "pointer-events-none" qo‘yilgan, shuning uchun modalni yonini bossa yopilmasligi mumkin
+                            -->
+
+                            <!-- Modal o‘zi -->
+                            <div class="relative bg-white rounded-lg w-full max-w-md p-6" @click.stop>
+                                <!--
+                                    relative: ichki elementlarni absolute bilan joylashtirish uchun asos
+                                    bg-white: fon rangi oq
+                                    rounded-lg: radius bilan yumaloqlash
+                                    w-full max-w-md: ekran kattaligiga qarab width, maksimal 28rem
+                                    p-6: padding ichki bo‘shliq
+                                    @click.stop: modal ustiga click qilinsa, event overlayga o‘tmaydi (modal yopilmasligi uchun)
+                                -->
+                                <h2 class="text-lg font-semibold mb-4">Material qo‘shish</h2>
+                                <!-- Modal sarlavhasi -->
+                                <!-- form -->
+                                <div class="space-y-4">
+
+                                    <input type="text" placeholder="Material name" v-model="form.material_name"
+                                        class="w-full border rounded px-3 py-2" :class="{
+                                            'border-red-500 focus:ring-red-500': form.errors.code,
+                                            'focus:ring-green-500': !form.errors.material_name
+                                        }">
+
+                                    <p v-if="form.errors.material_name" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.material_name }}
+                                    </p>
+
+                                    <input type="text" placeholder="Material color" v-model="form.color_code"
+                                        class="w-full border rounded px-3 py-2" :class="{
+                                            'border-red-500 focus:ring-red-500': form.errors.code,
+                                            'focus:ring-green-500': !form.errors.color_code
+                                        }">
+
+                                    <p v-if="form.errors.color_code" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.color_code }}
+                                    </p>
+
+                                    <input type="text" placeholder="Material code" v-model="form.code"
+                                        class="w-full border rounded px-3 py-2" :class="{
+                                            'border-red-500 focus:ring-red-500': form.errors.code,
+                                            'focus:ring-green-500': !form.errors.code
+                                        }">
+
+                                    <p v-if="form.errors.code" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.code }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </Teleport>
 
                 </div>
             </div>
