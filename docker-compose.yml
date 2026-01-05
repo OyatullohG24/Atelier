@@ -4,45 +4,94 @@ services:
   # MySQL Database
   mysql:
     image: mysql:8.0
-    container_name: laravel_mysql
+    container_name: atelier_mysql
     environment:
       MYSQL_ROOT_PASSWORD: root_secret
-      MYSQL_DATABASE: laravel_db
-      MYSQL_USER: laravel_user
-      MYSQL_PASSWORD: laravel_password
+      MYSQL_DATABASE: atelier_db
+      MYSQL_USER: atelier_user
+      MYSQL_PASSWORD: atelier_password
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - laravel_network
+      - atelier_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # phpMyAdmin (ixtiyoriy)
+  # phpMyAdmin
   phpmyadmin:
     image: phpmyadmin:latest
-    container_name: laravel_phpmyadmin
+    container_name: atelier_phpmyadmin
     environment:
       PMA_HOST: mysql
       PMA_PORT: 3306
       MYSQL_ROOT_PASSWORD: root_secret
     ports:
-      - "8080:80"
+      - "8081:80"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
-      - laravel_network
+      - atelier_network
     restart: unless-stopped
+
+  # PHP-FPM
+  php:
+    image: php:8.2-fpm
+    container_name: atelier_php
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: atelier_db
+      DB_USERNAME: atelier_user
+      DB_PASSWORD: atelier_password
+    networks:
+      - atelier_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    command: >
+      bash -c "
+        apt-get update && 
+        apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev zip unzip git && 
+        docker-php-ext-configure gd --with-freetype --with-jpeg && 
+        docker-php-ext-install pdo pdo_mysql gd && 
+        chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && 
+        chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache && 
+        php-fpm
+      "
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:alpine
+    container_name: atelier_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - atelier_network
+    restart: unless-stopped
+
+networks:
+  atelier_network:
+    driver: bridge
 
 volumes:
   mysql_data:
     driver: local
-
-networks:
-  laravel_network:
-    driver: bridge
