@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+
 
 interface Props {
     isOpen: boolean;
@@ -7,7 +7,7 @@ interface Props {
     title?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
     message: 'Rostdan ham o\'chirmoqchimisiz?',
     title: 'O\'chirishni tasdiqlash'
 });

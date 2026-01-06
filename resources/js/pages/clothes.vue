@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js';
 import { useToast } from '@/components/useToast/useToast';
@@ -176,7 +176,7 @@ const deleteSelected = () => {
 }
 
 
-const hasErrors = computed(() => Object.keys(form.errors).length > 0)
+
 
 // Update uchun
 const isEditOpen = ref(false)

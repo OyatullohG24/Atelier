@@ -2,7 +2,7 @@
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { route } from 'ziggy-js';
 import { useToast } from '@/components/useToast/useToast';
 import ToastContainer from '@/components/useToast/ToastContainer.vue';
@@ -22,7 +22,7 @@ interface Materials {
 const { success, error } = useToast();
 const page = usePage();
 
-const { materials, materials_count, filters } = defineProps<{
+const { materials, materials_count } = defineProps<{
     materials: Materials[];
     materials_count: number;
     filters: {
@@ -79,10 +79,10 @@ const submit = () => {
     form.post(route('material.store'), {
         forceFormData: true,
         onSuccess: () => {
-            closeModal(),
-                form.reset()
-            imageFile.value = null
-            imagePreview.value = null
+            closeModal();
+            form.reset();
+            imageFile.value = null;
+            imagePreview.value = null;
             const flashMessage = page.props.flash as any
             if (flashMessage?.success) {
                 success(flashMessage.success)
@@ -108,8 +108,9 @@ const deleteOne = (id: number) => {
     })
 }
 
-const openEditModal = async (id: number) => {
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const openEditModal = async (_id: number) => {
+    // TODO: Implement edit functionality
 }
 </script>
 
@@ -371,7 +372,7 @@ const openEditModal = async (id: number) => {
                                             <option value="zamok">Zamok</option>
                                         </select>
                                         <p v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{ form.errors.type
-                                        }}</p>
+                                            }}</p>
                                     </div>
 
                                     <!-- Material measurment select -->
@@ -386,7 +387,7 @@ const openEditModal = async (id: number) => {
                                         </select>
                                         <p v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{
                                             form.errors.measurement
-                                        }}</p>
+                                            }}</p>
                                     </div>
 
                                     <!-- Material image -->
