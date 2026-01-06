@@ -28,7 +28,6 @@ const { clothes, clothes_count, filters } = defineProps<{
         search?: string
     } // shu yerga qo'shasiz
 }>();
-console.log(clothes);
 
 // Search state
 const searchQuery = ref(filters?.search || '')

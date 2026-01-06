@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 import { useToast } from '@/components/useToast/useToast';
+import ToastContainer from '@/components/useToast/ToastContainer.vue';
 
 interface Materials {
     id: number;
@@ -19,10 +20,11 @@ interface Materials {
 }
 
 const { success, error } = useToast();
+const page = usePage();
 
 const { materials, materials_count, filters } = defineProps<{
     materials: Materials[];
-    materials_count: string;
+    materials_count: number;
     filters: {
         search?: string;
     }
@@ -81,7 +83,11 @@ const submit = () => {
                 form.reset()
             imageFile.value = null
             imagePreview.value = null
-            success("Material yuklandi")
+            const flashMessage = page.props.flash as any
+            if (flashMessage?.success) {
+                success(flashMessage.success)
+            }
+
         },
         onError: (errors) => {
             const firstError = Object.values(errors)[0] as string
@@ -89,13 +95,12 @@ const submit = () => {
         }
     })
 }
-
 </script>
 
 <template>
 
     <Head title="Materials" />
-
+    <ToastContainer />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-flex flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div class="col-span-12">
@@ -285,6 +290,8 @@ const submit = () => {
                                 -->
                                 <h2 class="text-lg font-semibold mb-4">Material qo‘shish</h2>
                                 <!-- Modal sarlavhasi -->
+                                <button @click="closeModal"
+                                    class="absolute top-2 right-4 text-gray-500 hover:text-black">X</button>
                                 <!-- form -->
                                 <div class="space-y-4">
 
@@ -402,8 +409,6 @@ const submit = () => {
                                             {{ form.processing ? 'Saqlanmoqda..' : 'Saqlash' }}
                                         </button>
                                     </div>
-                                    <button @click="closeModal"
-                                        class="absolute top-3 right-3 text-gray-500 hover:text-black">X</button>
                                 </div>
                             </div>
                         </div>

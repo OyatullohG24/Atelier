@@ -27,6 +27,11 @@ class MaterialController extends Controller
 
     public function store(MaterialStoreRequest $request)
     {
-        dd($request->all());
+        try {
+            $this->material_service->createMaterial($request);
+            return redirect()->back()->with('success', 'Material created successfully');
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 }

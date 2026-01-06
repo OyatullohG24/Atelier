@@ -13,17 +13,17 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * MaterialController - API Controller
- * 
+ *
  * Controller nima?
  * - HTTP request larni qabul qiladi
  * - Service layer ga yuboradi
  * - JSON response qaytaradi
- * 
+ *
  * Thin Controller principle:
  * - Controller da minimal logika
  * - Barcha business logika Service da
  * - Controller faqat request/response bilan ishlaydi
- * 
+ *
  * RESTful API:
  * - index() - GET /materials (barcha materiallar)
  * - store() - POST /materials (yangi material)
@@ -35,11 +35,11 @@ class MaterialController extends Controller
 {
     /**
      * Constructor - Dependency Injection
-     * 
+     *
      * MaterialService $material_service:
      * - Laravel avtomatik inject qiladi
      * - Service layer ga murojaat qilish uchun
-     * 
+     *
      * protected nima uchun?
      * - Class ichida ishlatiladigan property
      * - $this->material_service orqali access
@@ -50,23 +50,23 @@ class MaterialController extends Controller
 
     /**
      * Barcha materiallarni olish
-     * 
+     *
      * GET /api/materials
      * GET /api/materials?paginate=true&per_page=20
      * GET /api/materials?type=mato&search=ko'k
-     * 
+     *
      * Request $request:
      * - Query parameters olish uchun
      * - Filter va pagination uchun
-     * 
+     *
      * JsonResponse:
      * - JSON format da response
      * - Content-Type: application/json
-     * 
+     *
      * Pagination support:
      * - ?paginate=true - pagination yoqish
      * - ?per_page=20 - sahifada 20 ta element
-     * 
+     *
      * Filter support:
      * - ?type=mato - faqat mato materiallar
      * - ?search=ko'k - nom yoki kodda 'ko'k' so'zi bor materiallar
@@ -85,16 +85,16 @@ class MaterialController extends Controller
             if ($paginate) {
                 // Service dan sahifalangan ma'lumotlarni olish
                 $materials = $this->material_service->getPaginated($request, $perPage);
-                
+
                 // Response qaytarish (pagination ma'lumotlari bilan)
                 return response()->json([
                     'status' => true,
                     'message' => 'Materiallar muvaffaqiyatli olindi',
-                    
+
                     // MaterialResource::collection() - ma'lumotlarni transform qilish
                     // items() - faqat ma'lumotlar (pagination meta siz)
                     'data' => MaterialResource::collection($materials->items()),
-                    
+
                     // Pagination meta ma'lumotlari
                     'pagination' => [
                         'total' => $materials->total(),              // Jami elementlar soni
@@ -103,7 +103,7 @@ class MaterialController extends Controller
                         'last_page' => $materials->lastPage(),       // Oxirgi sahifa
                         'from' => $materials->firstItem(),           // Birinchi element raqami
                         'to' => $materials->lastItem(),              // Oxirgi element raqami
-                    ]
+                    ],
                 ]);
             }
 
@@ -115,12 +115,12 @@ class MaterialController extends Controller
                 'status' => true,
                 'message' => 'Materiallar muvaffaqiyatli olindi',
                 'data' => MaterialResource::collection($materials),
-                'count' => $materials->count()  // Jami elementlar soni
+                'count' => $materials->count(),  // Jami elementlar soni
             ]);
         } catch (\Throwable $th) {
             // 4. Xatolikni log qilish
             Log::error('MaterialController::index error', [
-                'message' => $th->getMessage()
+                'message' => $th->getMessage(),
             ]);
 
             // 5. Error response qaytarish
@@ -130,25 +130,25 @@ class MaterialController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Materiallarni olishda xatolik yuz berdi',
-                'error' => config('app.debug') ? $th->getMessage() : null
+                'error' => config('app.debug') ? $th->getMessage() : null,
             ], 500);
         }
     }
 
     /**
      * Yangi material yaratish
-     * 
+     *
      * POST /api/materials
-     * 
+     *
      * MaterialStoreRequest $request:
      * - Form Request validation
      * - Avtomatik validatsiya qilinadi
      * - Agar validatsiya muvaffaqiyatsiz bo'lsa, 422 error qaytaradi
-     * 
+     *
      * 201 status code:
      * - Created (yangi resurs yaratildi)
      * - RESTful API convention
-     * 
+     *
      * ValidationException:
      * - Service da throw qilingan validatsiya xatolari
      * - Masalan: kod unique emas
@@ -167,7 +167,7 @@ class MaterialController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Material muvaffaqiyatli yaratildi',
-                'data' => MaterialResource::make($material)
+                'data' => MaterialResource::make($material),
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             // 3. Validatsiya xatosi (masalan: kod unique emas)
@@ -176,34 +176,34 @@ class MaterialController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Validatsiya xatosi',
-                'errors' => $e->errors()  // ['code' => ['Bu kod allaqachon mavjud']]
+                'errors' => $e->errors(),  // ['code' => ['Bu kod allaqachon mavjud']]
             ], 422);
         } catch (\Throwable $th) {
             // 4. Boshqa xatoliklar (masalan: rasm yuklash xatosi)
             Log::error('MaterialController::store error', [
                 'message' => $th->getMessage(),
-                'trace' => $th->getTraceAsString()
+                'trace' => $th->getTraceAsString(),
             ]);
 
             // 500 - Internal Server Error
             return response()->json([
                 'status' => false,
                 'message' => 'Material yaratishda xatolik yuz berdi',
-                'error' => config('app.debug') ? $th->getMessage() : null
+                'error' => config('app.debug') ? $th->getMessage() : null,
             ], 500);
         }
     }
 
     /**
      * Bitta materialni ko'rsatish
-     * 
+     *
      * GET /api/materials/{id}
-     * 
+     *
      * int $id:
      * - Route parameter
      * - Material ID
      * - Type hinting (int bo'lishi kerak)
-     * 
+     *
      * 404 error:
      * - Material topilmasa
      * - Service exception throw qiladi
@@ -219,37 +219,37 @@ class MaterialController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Material muvaffaqiyatli olindi',
-                'data' => MaterialResource::make($material)
+                'data' => MaterialResource::make($material),
             ]);
         } catch (\Throwable $th) {
             // 3. Xatolik (material topilmadi)
             Log::error('MaterialController::show error', [
                 'id' => $id,
-                'message' => $th->getMessage()
+                'message' => $th->getMessage(),
             ]);
 
             // 404 - Not Found
             return response()->json([
                 'status' => false,
                 'message' => 'Material topilmadi',
-                'error' => config('app.debug') ? $th->getMessage() : null
+                'error' => config('app.debug') ? $th->getMessage() : null,
             ], 404);
         }
     }
 
     /**
      * Materialni yangilash
-     * 
+     *
      * PUT /api/materials/{id}
      * PATCH /api/materials/{id}
-     * 
+     *
      * MaterialUpdateRequest $request:
      * - Update uchun validatsiya
      * - material_image nullable (majburiy emas)
-     * 
+     *
      * int $id:
      * - Qaysi materialni yangilash
-     * 
+     *
      * Update logikasi:
      * - Yangi rasm yuklansa, eski rasmni o'chirish
      * - Yangi rasm yuklanmasa, eski rasmni saqlash
@@ -268,35 +268,35 @@ class MaterialController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Material muvaffaqiyatli yangilandi',
-                'data' => MaterialResource::make($material)
+                'data' => MaterialResource::make($material),
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             // 3. Validatsiya xatosi
             return response()->json([
                 'status' => false,
                 'message' => 'Validatsiya xatosi',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Throwable $th) {
             // 4. Boshqa xatoliklar
             Log::error('MaterialController::update error', [
                 'id' => $id,
-                'message' => $th->getMessage()
+                'message' => $th->getMessage(),
             ]);
 
             return response()->json([
                 'status' => false,
                 'message' => 'Material yangilashda xatolik yuz berdi',
-                'error' => config('app.debug') ? $th->getMessage() : null
+                'error' => config('app.debug') ? $th->getMessage() : null,
             ], 500);
         }
     }
 
     /**
      * Materialni o'chirish
-     * 
+     *
      * DELETE /api/materials/{id}
-     * 
+     *
      * Delete logikasi:
      * - Database dan o'chirish
      * - Rasm faylini o'chirish
@@ -313,32 +313,32 @@ class MaterialController extends Controller
             return response()->json([
                 'status' => $result,
                 'message' => $result ? 'Material muvaffaqiyatli o\'chirildi' : 'Material o\'chirishda xatolik',
-                'data' => []
+                'data' => [],
             ]);
         } catch (\Throwable $th) {
             // 3. Xatolik
             Log::error('MaterialController::destroy error', [
                 'id' => $id,
-                'message' => $th->getMessage()
+                'message' => $th->getMessage(),
             ]);
 
             return response()->json([
                 'status' => false,
                 'message' => 'Material o\'chirishda xatolik yuz berdi',
-                'error' => config('app.debug') ? $th->getMessage() : null
+                'error' => config('app.debug') ? $th->getMessage() : null,
             ], 500);
         }
     }
 
     /**
      * Tur bo'yicha materiallar
-     * 
+     *
      * GET /api/materials/type/{type}
-     * 
+     *
      * string $type:
      * - Material turi: mato, tugma, ip, zamok
      * - Route parameter
-     * 
+     *
      * Validatsiya:
      * - Faqat to'g'ri turlar qabul qilinadi
      * - Noto'g'ri tur bo'lsa, 400 error
@@ -348,14 +348,14 @@ class MaterialController extends Controller
         try {
             // 1. Valid turlarni tekshirish
             $validTypes = ['mato', 'tugma', 'ip', 'zamok'];
-            
+
             // in_array() - array da mavjudligini tekshirish
-            if (!in_array($type, $validTypes)) {
+            if (! in_array($type, $validTypes)) {
                 // 400 - Bad Request
                 return response()->json([
                     'status' => false,
                     'message' => 'Noto\'g\'ri material turi',
-                    'valid_types' => $validTypes  // To'g'ri turlar ro'yxati
+                    'valid_types' => $validTypes,  // To'g'ri turlar ro'yxati
                 ], 400);
             }
 
@@ -367,28 +367,28 @@ class MaterialController extends Controller
                 'status' => true,
                 'message' => 'Materiallar muvaffaqiyatli olindi',
                 'data' => MaterialResource::collection($materials),
-                'count' => $materials->count()
+                'count' => $materials->count(),
             ]);
         } catch (\Throwable $th) {
             // 4. Xatolik
             Log::error('MaterialController::getByType error', [
                 'type' => $type,
-                'message' => $th->getMessage()
+                'message' => $th->getMessage(),
             ]);
 
             return response()->json([
                 'status' => false,
                 'message' => 'Materiallarni olishda xatolik yuz berdi',
-                'error' => config('app.debug') ? $th->getMessage() : null
+                'error' => config('app.debug') ? $th->getMessage() : null,
             ], 500);
         }
     }
 
     /**
      * Material statistikasi
-     * 
+     *
      * GET /api/materials/statistics
-     * 
+     *
      * Response:
      * {
      *   "total": 100,
@@ -411,18 +411,18 @@ class MaterialController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Statistika muvaffaqiyatli olindi',
-                'data' => $statistics
+                'data' => $statistics,
             ]);
         } catch (\Throwable $th) {
             // 3. Xatolik
             Log::error('MaterialController::statistics error', [
-                'message' => $th->getMessage()
+                'message' => $th->getMessage(),
             ]);
 
             return response()->json([
                 'status' => false,
                 'message' => 'Statistikani olishda xatolik yuz berdi',
-                'error' => config('app.debug') ? $th->getMessage() : null
+                'error' => config('app.debug') ? $th->getMessage() : null,
             ], 500);
         }
     }

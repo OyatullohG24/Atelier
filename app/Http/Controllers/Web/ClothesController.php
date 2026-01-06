@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Models\Clothes;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Clothes;
 use App\Services\ClothesService;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ClothesController extends Controller
@@ -15,12 +15,13 @@ class ClothesController extends Controller
     public function index(Request $request)
     {
         $clothes = $this->clothes_service->getAll($request->all());
+
         return Inertia::render('clothes', [
             'clothes' => $clothes,
             'clothes_count' => $clothes->count(),
             'filters' => [
-                'search' => $request->get('search')
-            ]
+                'search' => $request->get('search'),
+            ],
         ]);
     }
 
@@ -37,6 +38,7 @@ class ClothesController extends Controller
             'clothes_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
         $this->clothes_service->createClothes($request);
+
         return redirect()->back()->with('success', 'Clothes created successfully');
     }
 
@@ -52,7 +54,7 @@ class ClothesController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Clothes updated successfully',
-                'data' => $this->clothes_service->updateClothes($id, $request)
+                'data' => $this->clothes_service->updateClothes($id, $request),
             ]);
         }
     }
@@ -76,6 +78,7 @@ class ClothesController extends Controller
             'ids.*' => 'integer|exists:clothes,id',
         ]);
         $this->clothes_service->bulkDestroyClothes($request);
+
         return redirect()->back()->with('success', 'Clothes deleted successfully');
     }
 }
