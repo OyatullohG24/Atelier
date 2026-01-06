@@ -25,5 +25,6 @@ Route::delete('clothes', [ClothesController::class, 'bulkDestroy'])->name('cloth
 
 Route::get('materials', [MaterialController::class, 'index'])->name('material.index');
 Route::post('materials', [MaterialController::class, 'store'])->name('material.store');
+Route::delete('materials/{id}', [MaterialController::class, 'delete'])->name('material.delete');
 
 require __DIR__.'/settings.php';

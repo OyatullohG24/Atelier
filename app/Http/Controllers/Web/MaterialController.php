@@ -14,22 +14,38 @@ class MaterialController extends Controller
 
     public function index(Request $request)
     {
-        $materials = $this->material_service->getAll();
+        try {
+            $materials = $this->material_service->getAll();
 
-        return Inertia::render('material', [
-            'materials' => $materials,
-            'materials_count' => $materials->count(),
-            'filters' => [
-                'search' => $request->get('search'),
-            ],
-        ]);
+            return Inertia::render('material', [
+                'materials' => $materials,
+                'materials_count' => $materials->count(),
+                'filters' => [
+                    'search' => $request->get('search'),
+                ],
+            ]);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     public function store(MaterialStoreRequest $request)
     {
         try {
             $this->material_service->createMaterial($request);
+
             return redirect()->back()->with('success', 'Material created successfully');
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    public function delete($id)
+    {
+        try {
+            $this->material_service->deleteMaterial($id);
+
+            return redirect()->back()->with('success', 'Material deleted successfully');
         } catch (\Throwable $th) {
             throw $th;
         }
