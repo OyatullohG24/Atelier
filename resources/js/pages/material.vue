@@ -3,7 +3,8 @@ import { Head, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
 import { ref } from 'vue';
-import axios from 'axios'
+import { route } from 'ziggy-js';
+import { useToast } from '@/components/useToast/useToast';
 
 interface Materials {
     id: number;
@@ -16,6 +17,8 @@ interface Materials {
     created_at: string;
     updated_at: string;
 }
+
+const { success, error } = useToast();
 
 const { materials, materials_count, filters } = defineProps<{
     materials: Materials[];
@@ -68,6 +71,23 @@ const onImageChange = (event: Event) => {
     imagePreview.value = URL.createObjectURL(file)
 
     form.material_image = file
+}
+
+const submit = () => {
+    form.post(route('material.store'), {
+        forceFormData: true,
+        onSuccess: () => {
+            closeModal(),
+                form.reset()
+            imageFile.value = null
+            imagePreview.value = null
+            success("Material yuklandi")
+        },
+        onError: (errors) => {
+            const firstError = Object.values(errors)[0] as string
+            error(firstError)
+        }
+    })
 }
 
 </script>
@@ -309,7 +329,7 @@ const onImageChange = (event: Event) => {
                                             <option value="zamok">Zamok</option>
                                         </select>
                                         <p v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{ form.errors.type
-                                            }}</p>
+                                        }}</p>
                                     </div>
 
                                     <!-- Material measurment select -->
@@ -324,7 +344,7 @@ const onImageChange = (event: Event) => {
                                         </select>
                                         <p v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{
                                             form.errors.measurement
-                                            }}</p>
+                                        }}</p>
                                     </div>
 
                                     <!-- Material image -->
@@ -373,6 +393,17 @@ const onImageChange = (event: Event) => {
                                         </button>
                                     </div>
 
+                                    <div class="flex justify-end gap-2 mt-6">
+                                        <button @click="closeModal" class="px-4 py-2 bg-gray-200 rounded">
+                                            Bekor qilish
+                                        </button>
+                                        <button class="px-4 py-4 bg-green-400 text-white rounded" @click="submit"
+                                            :disabled="form.processing">
+                                            {{ form.processing ? 'Saqlanmoqda..' : 'Saqlash' }}
+                                        </button>
+                                    </div>
+                                    <button @click="closeModal"
+                                        class="absolute top-3 right-3 text-gray-500 hover:text-black">X</button>
                                 </div>
                             </div>
                         </div>
