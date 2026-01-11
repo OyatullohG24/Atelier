@@ -6,6 +6,7 @@ import { ref } from 'vue';
 import { route } from 'ziggy-js';
 import { useToast } from '@/components/useToast/useToast';
 import ToastContainer from '@/components/useToast/ToastContainer.vue';
+import axios from 'axios';
 
 interface Materials {
     id: number;
@@ -55,7 +56,7 @@ const form = useForm({
     material_name: '',
     type: '',
     color_code: '',
-    material_image: '',
+    material_image: null as File | null,
     code: '',
     measurement: ''
 })
@@ -108,9 +109,48 @@ const deleteOne = (id: number) => {
     })
 }
 
+const isEditOpen = ref(false)
+const editingId = ref<number | null>(null)
+
+const editForm = useForm({
+    material_name: '',
+    type: '',
+    color_code: '',
+    material_image: null as File | null,
+    code: '',
+    measurement: ''
+});
+
+const editImageFile = ref<File | null>(null)
+const editImagePreview = ref<string | null>(null)
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const openEditModal = async (_id: number) => {
+const openEditModal = async (id: number) => {
     // TODO: Implement edit functionality
+    try {
+        const response = await axios.get(route('material.show', id))
+        const item = response.data.data || response.data
+
+        console.log(item);
+
+        editingId.value = item.id
+        editForm.material_name = item.name
+        editForm.type = item.type
+        editForm.color_code = item.color_code
+        editForm.code = item.code
+        editForm.measurement = item.measurement
+
+        editImagePreview.value = getImageUrl(item.image)
+
+        // Eski rasmni tozalash
+        editImageFile.value = null
+        editForm.material_image = null
+
+        isEditOpen.value = true
+    } catch (err: any) {
+        error('Ma\'lumotlarni yuklashda xatolik')
+        console.error('Edit modal error:', err)
+    }
 }
 </script>
 
@@ -450,6 +490,16 @@ const openEditModal = async (_id: number) => {
                         </div>
                     </Teleport>
 
+                    <Teleport to="body">
+                        <div v-if="isEditOpen" class="fixed inset-0 z-[999] flex items-center justify-center">
+                            <div class="absolute inset-0 bg-black/50 pointer-events-none"></div>
+
+                            <!-- Modal -->
+                            <div class="relative bg-white rounded-lg w-full max-w-md p-6" @click.stop>
+                                <h2 class="text-lg font-semibold mb-4">Materialni tahrirlash</h2>
+                            </div>
+                        </div>
+                    </Teleport>
                 </div>
             </div>
         </div>

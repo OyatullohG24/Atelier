@@ -29,6 +29,15 @@ class MaterialController extends Controller
         }
     }
 
+    public function show($id)
+    {
+        try {
+            return $this->material_service->getOne($id);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
     public function store(MaterialStoreRequest $request)
     {
         try {
