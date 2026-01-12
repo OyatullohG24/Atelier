@@ -162,6 +162,21 @@ const closeEditModal = () => {
     editImagePreview.value = null
 }
 
+const onEditImageChange = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    const file = target.files?.[0]
+
+    if (!file) return
+
+    editImageFile.value = file
+    editImagePreview.value = URL.createObjectURL(file)
+    editForm.material_image = file
+}
+
+const submitUpdate = () => {
+    return true
+}
+
 </script>
 
 <template>
@@ -521,7 +536,7 @@ const closeEditModal = () => {
                                     <div>
                                         <input type="text" placeholder="Material color" v-model="editForm.color_code"
                                             class="w-full border rounded px-3 py-2"
-                                            :class="{ 'border-red-500': editForm.color_code }" />
+                                            :class="{ 'border-red-500': editForm.errors.color_code }" />
                                         <p v-if="editForm.errors.color_code" class="text-red-500 text-xs mt-1">
                                             {{ editForm.errors.color_code }}
                                         </p>
@@ -561,8 +576,65 @@ const closeEditModal = () => {
                                             {{ editForm.errors.measurement }}
                                         </p>
                                     </div>
-                                </div>
 
+                                    <div>
+                                        <label class="block">
+                                            <span class="text-sm font-medium text-gray-700 mb-1 block">
+                                                Material image
+                                            </span>
+
+                                            <div class="flex items-center justify-between border rounded px-3 py-2 cursor-pointer hover:border-green-700"
+                                                :class="{ 'border-red-500': editForm.material_image }"
+                                                @click="$refs.editFileInput.click()">
+                                                <span class="text-gray-500 text-sm truncate">
+                                                    {{
+                                                        editImageFile ? editImageFile.name : 'Rasm tanlang (ixtiyoriy)'
+                                                    }}
+                                                </span>
+                                                <span class="text-sm text-green-600 font-medium">
+                                                    Browse
+                                                </span>
+
+                                                <input type="file" accept="image/*" ref="editFileInput" class="hidden"
+                                                    @change="onEditImageChange" />
+                                            </div>
+                                        </label>
+                                        <p v-if="editForm.errors.material_image" class="text-red-500 text-xs mt-1">
+                                            {{ editForm.errors.material_image }}
+                                        </p>
+                                    </div>
+
+                                    <div v-if="editImagePreview"
+                                        class="mt-4 rounded-lg border p-3 flex items-center gap-4 bg-gray-50">
+                                        <img :src="editImagePreview" alt="Preview"
+                                            class="h-20 w-20 object-cover rounded" />
+
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-gray-800">
+                                                {{ editImageFile?.name || 'Mavjud rasm' }}
+                                            </p>
+                                            <p v-if="editImageFile" class="text-xs text-gray-500">
+                                                {{ (editImageFile.size / 1024).toFixed(1) }} KB
+                                            </p>
+                                        </div>
+                                        <button v-if="editImageFile" type="button"
+                                            class="text-red-500 text-sm hover:underline"
+                                            @click="editImageFile = null; editImagePreview = null; editForm.material_image = null">
+                                            O'chirish
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Buttons -->
+                                <div class="flex justify-end gap-2 mt-6">
+                                    <button @click="closeEditModal"
+                                        class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+                                        Bekor qilish
+                                    </button>
+                                    <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                        @click="submitUpdate" :disabled="editForm.processing">
+                                        {{ editForm.processing ? 'Saqlanmoqda...' : 'Yangilash' }}
+                                    </button>
+                                </div>
                                 <button @click="closeEditModal"
                                     class="absolute top-3 right-3 text-gray-500 hover:text-black">
                                     ✕
