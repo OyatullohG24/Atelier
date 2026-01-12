@@ -152,6 +152,16 @@ const openEditModal = async (id: number) => {
         console.error('Edit modal error:', err)
     }
 }
+
+
+const closeEditModal = () => {
+    isEditOpen.value = false
+    editingId.value = null
+    editForm.reset()
+    editImageFile.value = null
+    editImagePreview.value = null
+}
+
 </script>
 
 <template>
@@ -412,7 +422,7 @@ const openEditModal = async (id: number) => {
                                             <option value="zamok">Zamok</option>
                                         </select>
                                         <p v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{ form.errors.type
-                                            }}</p>
+                                        }}</p>
                                     </div>
 
                                     <!-- Material measurment select -->
@@ -427,7 +437,7 @@ const openEditModal = async (id: number) => {
                                         </select>
                                         <p v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{
                                             form.errors.measurement
-                                            }}</p>
+                                        }}</p>
                                     </div>
 
                                     <!-- Material image -->
@@ -497,6 +507,66 @@ const openEditModal = async (id: number) => {
                             <!-- Modal -->
                             <div class="relative bg-white rounded-lg w-full max-w-md p-6" @click.stop>
                                 <h2 class="text-lg font-semibold mb-4">Materialni tahrirlash</h2>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <input type="text" placeholder="Material name" v-model="editForm.material_name"
+                                            class="w-full border rounded px-3 py-2"
+                                            :class="{ 'border-red-500': editForm.errors.material_name }" />
+                                        <p v-if="editForm.errors.material_name" class="text-red-500 text-xs mt-1">
+                                            {{ editForm.errors.material_name }}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <input type="text" placeholder="Material color" v-model="editForm.color_code"
+                                            class="w-full border rounded px-3 py-2"
+                                            :class="{ 'border-red-500': editForm.color_code }" />
+                                        <p v-if="editForm.errors.color_code" class="text-red-500 text-xs mt-1">
+                                            {{ editForm.errors.color_code }}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <input type="text" placeholder="Material code" v-model="editForm.code"
+                                            class="w-full border rounded px-3 py-2"
+                                            :class="{ 'border-red-500': editForm.errors.code }" />
+                                        <p v-if="editForm.errors.code" class="text-red-500 text-xs mt-1">
+                                            {{ editForm.errors.code }}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <select v-model="editForm.measurement" class="w-full border rounded px-3 py-2">
+                                            <option value="" class="text-gray-400">Material measurement select</option>
+                                            <option value="kg">kg</option>
+                                            <option value="m">m</option>
+                                            <option value="kv">kv</option>
+                                            <option value="dona">dona</option>
+                                        </select>
+                                        <p v-if="editForm.errors.measurement" class="texy-red-500 text-xs mt-1">
+                                            {{ editForm.errors.measurement }}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <select v-model="editForm.type" class="w-full border rounded px-3 py-2">
+                                            <option value="" class="text-gray-400">Material type select</option>
+                                            <option value="mato">Mato</option>
+                                            <option value="tugma">Tugma</option>
+                                            <option value="ip">Ip</option>
+                                            <option value="zamok">Zamok</option>
+                                        </select>
+                                        <p v-if="editForm.errors.measurement" class="texy-red-500 text-xs mt-1">
+                                            {{ editForm.errors.measurement }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <button @click="closeEditModal"
+                                    class="absolute top-3 right-3 text-gray-500 hover:text-black">
+                                    ✕
+                                </button>
                             </div>
                         </div>
                     </Teleport>
