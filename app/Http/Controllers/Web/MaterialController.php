@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Material\MaterialStoreRequest;
 use App\Services\MaterialService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class MaterialController extends Controller
@@ -33,6 +34,19 @@ class MaterialController extends Controller
     {
         try {
             return $this->material_service->getOne($id);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            // Log::info('Foydalanuvchi tizimga kirdi', [
+            //     'request' => $request->all()
+            // ]);
+            $this->material_service->updateMaterial($id, $request);
+            return true;
         } catch (\Throwable $th) {
             throw $th;
         }

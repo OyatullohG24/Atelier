@@ -131,8 +131,6 @@ const openEditModal = async (id: number) => {
         const response = await axios.get(route('material.show', id))
         const item = response.data.data || response.data
 
-        console.log(item);
-
         editingId.value = item.id
         editForm.material_name = item.name
         editForm.type = item.type
@@ -173,8 +171,57 @@ const onEditImageChange = (event: Event) => {
     editForm.material_image = file
 }
 
-const submitUpdate = () => {
-    return true
+const submitUpdate = async () => {
+
+    if (!editingId.value) {
+        error("Id topilmadi")
+        return
+    }
+
+    try {
+        const formData = new FormData()
+        formData.append('type', editForm.type)
+        formData.append('material_name', editForm.material_name)
+        formData.append('code', editForm.code)
+        formData.append('color_code', editForm.color_code)
+        formData.append('measurement', editForm.measurement)
+
+        if (editForm.material_image) {
+            formData.append('material_image', editForm.material_image)
+        }
+
+        formData.append('_method', 'PUT')
+
+        editForm.processing = true
+        console.log(200);
+
+        await axios.post(
+            route('material.update', editingId.value),
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            }
+        )
+
+        closeEditModal()
+        success("Muvaffaqiyatli yangilandi!")
+
+        // Oddiy reload
+        window.location.reload()
+
+    } catch (err: any) {
+        if (err.response?.data?.errors) {
+            const errors = err.response.data.errors
+            const firstError = Object.values(errors)[0] as string[]
+            error(firstError[0])
+        } else {
+            error('Xatolik yuz berdi')
+        }
+    } finally {
+        editForm.processing = false
+    }
 }
 
 </script>
@@ -437,7 +484,7 @@ const submitUpdate = () => {
                                             <option value="zamok">Zamok</option>
                                         </select>
                                         <p v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{ form.errors.type
-                                        }}</p>
+                                            }}</p>
                                     </div>
 
                                     <!-- Material measurment select -->
@@ -452,7 +499,7 @@ const submitUpdate = () => {
                                         </select>
                                         <p v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{
                                             form.errors.measurement
-                                        }}</p>
+                                            }}</p>
                                     </div>
 
                                     <!-- Material image -->

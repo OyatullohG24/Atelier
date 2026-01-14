@@ -25,6 +25,7 @@ Route::delete('clothes', [ClothesController::class, 'bulkDestroy'])->name('cloth
 
 Route::get('materials', [MaterialController::class, 'index'])->name('material.index');
 Route::get('materials/{id}', [MaterialController::class, 'show'])->name('material.show');
+Route::put('materials/{id}', [MaterialController::class, 'update'])->name('material.update');
 Route::post('materials', [MaterialController::class, 'store'])->name('material.store');
 Route::delete('materials/{id}', [MaterialController::class, 'delete'])->name('material.delete');
 
